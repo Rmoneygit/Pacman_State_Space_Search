@@ -87,7 +87,35 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    s = problem.getStartState()
+    open = util.Queue()
+    open.push(s)
+    closed = util.Queue()
+    parents = {s: None}
+    fwd_path = []
+
+    while not open.isEmpty():
+        x = open.pop()
+        if(problem.isGoalState(x)):
+            path = util.Stack()
+            while x is not None:
+                path.push(x)
+                x = parents[x]
+            while not path.isEmpty():
+                x = path.pop()
+                fwd_path.append(x)
+        else:
+            children = problem.getSuccessors(x)
+            closed.push(x)
+            for child in children:
+                parents[child] = x
+                if not child in closed.list or not child in open.list:
+                    open.push(child)
+    
+    return fwd_path
+
+
+
 
 def findAnswer(start, end, list):
     #print("end", end)
