@@ -87,31 +87,20 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    s = problem.getStartState()
     open = util.Queue()
-    open.push((s, [s]))
+    open.push(problem.getStartState())
     closed = util.Queue()
 
     while not open.isEmpty():
         x = open.pop()
-        if(problem.isGoalState(x[0])):
-            return x[1]
+        if(problem.isGoalState(x)):
+            return x
         else:
             children = problem.getSuccessors(x[0])
             closed.push(x)
             for child in children:
-                closed_copy = util.Queue()
-                containedInClosed = False
-                while not closed.isEmpty():
-                    el = closed.pop()
-                    closed_copy.push()
-                    if(el == child):
-                        containedInClosed = True
-                    
-
-                if not containedInClosed or not open.contains(child):
-                    pathToChild = x[1].append(child)
-                    open.push((child, pathToChild))
+                if not child in closed.list or not child in open.list:
+                    open.push(child)
     
     return []
 
