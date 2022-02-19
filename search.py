@@ -117,7 +117,7 @@ def depthFirstSearch(problem):
 
 
 
-def findAnswer(start, end, list):
+def findAnswer(start, end, list):   # find answer from back to front
     #print("end", end)
     #print("list", list)
     from game import Directions
@@ -127,16 +127,17 @@ def findAnswer(start, end, list):
     cur = end
     while cur[0] != start:
         x, y = cur[0]
-        dir = Directions.REVERSE[cur[1]]
+        dir = Directions.REVERSE[cur[1]]    # find reverse direction -> (nextx, nexty)
         answer.append(cur[1])
-        print(cur, cur[1])
+        #print(cur, cur[1])
         dx, dy = Actions.directionToVector(dir)
-        nextx, nexty = int(x + dx), int(y + dy)
-        for i in list:
-            if i[0] == (nextx, nexty):
-                cur = i
+        nextx, nexty = int(x + dx), int(y + dy)     
+        
+        for li in list: 
+            if li[0] == (nextx, nexty):     # find next cur in list
+                cur = li
     
-    answer.reverse()
+    answer.reverse()    # reverse answer because it is backward
     #print("answer!!", answer)
     return answer
 
@@ -144,16 +145,11 @@ def findAnswer(start, end, list):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    from game import Directions
-    n = Directions.NORTH
-    s = Directions.SOUTH
-    w = Directions.WEST
-    e = Directions.EAST
 
     from util import Queue
     open = Queue()
-    closed = []
-    answerList = []
+    closed = []         # checked path
+    answerList = []     # possible path with ((x,y), dir, cost)  
     start = problem.getStartState()
 
     print("Start:", problem.getStartState())
@@ -162,21 +158,21 @@ def breadthFirstSearch(problem):
     
     open.push([start])
     while not open.isEmpty():
-        cur = open.pop()
-        curState = cur[0]
-        #print("cur", cur)
-        #print("curState", curState)
-        #print("goal?",problem.isGoalState(curState))
+        cur = open.pop()    # contains (x,y), dir, cost
+        curState = cur[0]   # only (x,y)
+        '''print("cur", cur)
+        print("curState", curState)
+        print("goal?",problem.isGoalState(curState))'''
 
         if problem.isGoalState(curState):
             #print("end")
-            return findAnswer(start, cur, answerList)
-            #return [s, s, w, s, w, w, s, w]
+            return findAnswer(start, cur, answerList) # cur is end state
 
         successors = problem.getSuccessors(curState)
         #print("suc", successors)
         closed.append(curState)
         answerList.append(cur)
+
         for suc in successors:
             if suc[0] not in closed:
                 open.push(suc)
