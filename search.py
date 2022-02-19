@@ -89,9 +89,71 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+def findAnswer(start, end, list):
+    #print("end", end)
+    #print("list", list)
+    from game import Directions
+    from game import Actions
+    
+    answer = []
+    cur = end
+    while cur[0] != start:
+        x, y = cur[0]
+        dir = Directions.REVERSE[cur[1]]
+        answer.append(cur[1])
+        print(cur, cur[1])
+        dx, dy = Actions.directionToVector(dir)
+        nextx, nexty = int(x + dx), int(y + dy)
+        for i in list:
+            if i[0] == (nextx, nexty):
+                cur = i
+    
+    answer.reverse()
+    #print("answer!!", answer)
+    return answer
+
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    from game import Directions
+    n = Directions.NORTH
+    s = Directions.SOUTH
+    w = Directions.WEST
+    e = Directions.EAST
+
+    from util import Queue
+    open = Queue()
+    closed = []
+    answerList = []
+    start = problem.getStartState()
+
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    
+    open.push([start])
+    while not open.isEmpty():
+        cur = open.pop()
+        curState = cur[0]
+        #print("cur", cur)
+        #print("curState", curState)
+        #print("goal?",problem.isGoalState(curState))
+
+        if problem.isGoalState(curState):
+            #print("end")
+            return findAnswer(start, cur, answerList)
+            #return [s, s, w, s, w, w, s, w]
+
+        successors = problem.getSuccessors(curState)
+        #print("suc", successors)
+        closed.append(curState)
+        answerList.append(cur)
+        for suc in successors:
+            if suc[0] not in closed:
+                open.push(suc)
+        
+
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
