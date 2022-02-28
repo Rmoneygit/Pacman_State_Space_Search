@@ -73,60 +73,44 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
+    """Search the deepest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    s = problem.getStartState()
-    open = util.Queue()
-    open.push(s)
-    closed = util.Queue()
-    parents = {s: None}
-    fwd_path = []
+    s = problem.getStartState() # Get the starting state of the problem
+    open = util.Queue() # LIFO queue containing nodes to be checked
+    closed = util.Queue() # LIFO queue containing nodes that have been checked
+    parents = {s: None} # dictionary that records parent-child relationship between nodes
+    fwd_path = [] # the final answer to be returned; a forward path from the start state to the goal state
 
-    print('start state is {}'.format(s))
+    if not problem.isGoalState(s):
+        open.push([s]) # We need the brackets since problem.getStartState returns only a tuple.
+    
+    while not open.isEmpty(): # Continue until we reach a point where there are no more nodes to check.
+        x_obj = open.pop() # contains ((x, y), dir, cost)
+        x = x_obj[0] # only (x, y)
 
-    while not open.isEmpty():
-        x = open.pop()
         if(problem.isGoalState(x)):
-            print('goal state has been found, it is {}'.format(x))
-            print('open is {}'.format(str(open.list)))
-            print('closed is {}'.format(str(closed.list)))
-            path = util.Stack()
-            print('entered while x is not None while loop.')
-            while x is not None:
-                print('x is {}'.format(x))
-                path.push(x)
-                x = parents[x]
-            print('exited while x is not None while loop.')
-            print('entered while path is not None while loop.')
-            while not path.isEmpty():
+            path = util.Stack() # Data structure used to hold backwards path from goal state to start state
+
+            while x_obj is not None: # Go until we find a node who has no parent, namely the starting node
+                path.push(x_obj) # Add node x_obj to the path
+                x_obj = parents[x_obj[0]] # Change focus to x_obj's parent (0th element is coords)
+
+            path.pop() # pop the start node off the stack, since we don't include it in the path.
+
+            while not path.isEmpty(): # Pop nodes off the stack until empty to reverse it
                 x = path.pop()
-                fwd_path.append(x)
-            print('exited while path is not None while loop.')
+                fwd_path.append(x[1]) # Only include the direction
+
         else:
-            print('x is {}'.format(x))
-            children = problem.getSuccessors(x)
-            print('children are {}'.format(children))
-            closed.push(x)
+            children = problem.getSuccessors(x) # Find the child nodes of x
+            closed.push(x) # We have visited x and seen is it not the goal state, so put it away into closed
+
             for child in children:
                 coords = child[0]
-                if not coords in closed.list and not coords in open.list:
-                    print('coordinates of child of {} being added are {}'.format(x, coords))
-                    parents[coords] = x
-                    open.push(coords)
-    
-    print('Path to the food is: {}'.format(fwd_path))
+                if not coords in closed.list:
+                    parents[coords] = x_obj # Use this instead of x bcs we need direction and cost values later on.
+                    open.push(child) # Push the entire child obj into the open queue to be checked later.
+
     return fwd_path
 
 
@@ -153,7 +137,7 @@ def findAnswer(start, end, list):   # find answer from back to front
                 cur = li
     
     answer.reverse()    # reverse answer because it is backward
-    print("answer found by bfs!!", answer)
+    #print("answer found by bfs!!", answer)
     return answer
 
 
