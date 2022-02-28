@@ -94,24 +94,39 @@ def depthFirstSearch(problem):
     parents = {s: None}
     fwd_path = []
 
+    print('start state is {}'.format(s))
+
     while not open.isEmpty():
         x = open.pop()
         if(problem.isGoalState(x)):
+            print('goal state has been found, it is {}'.format(x))
+            print('open is {}'.format(str(open.list)))
+            print('closed is {}'.format(str(closed.list)))
             path = util.Stack()
+            print('entered while x is not None while loop.')
             while x is not None:
+                print('x is {}'.format(x))
                 path.push(x)
                 x = parents[x]
+            print('exited while x is not None while loop.')
+            print('entered while path is not None while loop.')
             while not path.isEmpty():
                 x = path.pop()
                 fwd_path.append(x)
+            print('exited while path is not None while loop.')
         else:
+            print('x is {}'.format(x))
             children = problem.getSuccessors(x)
+            print('children are {}'.format(children))
             closed.push(x)
             for child in children:
-                parents[child] = x
-                if not child in closed.list or not child in open.list:
-                    open.push(child)
+                coords = child[0]
+                if not coords in closed.list and not coords in open.list:
+                    print('coordinates of child of {} being added are {}'.format(x, coords))
+                    parents[coords] = x
+                    open.push(coords)
     
+    print('Path to the food is: {}'.format(fwd_path))
     return fwd_path
 
 
@@ -138,7 +153,7 @@ def findAnswer(start, end, list):   # find answer from back to front
                 cur = li
     
     answer.reverse()    # reverse answer because it is backward
-    #print("answer!!", answer)
+    print("answer found by bfs!!", answer)
     return answer
 
 
