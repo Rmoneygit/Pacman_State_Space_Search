@@ -76,8 +76,8 @@ def depthFirstSearch(problem):
     """Search the deepest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     s = problem.getStartState() # Get the starting state of the problem
-    open = util.Queue() # LIFO queue containing nodes to be checked
-    closed = util.Queue() # LIFO queue containing nodes that have been checked
+    open = util.Stack() # LIFO queue containing nodes to be checked
+    closed = util.Stack() # LIFO queue containing nodes that have been checked
     parents = {s: None} # dictionary that records parent-child relationship between nodes
     fwd_path = [] # the final answer to be returned; a forward path from the start state to the goal state
 
@@ -100,6 +100,7 @@ def depthFirstSearch(problem):
             while not path.isEmpty(): # Pop nodes off the stack until empty to reverse it
                 x = path.pop()
                 fwd_path.append(x[1]) # Only include the direction
+            return fwd_path
 
         else:
             children = problem.getSuccessors(x) # Find the child nodes of x
@@ -111,34 +112,7 @@ def depthFirstSearch(problem):
                     parents[coords] = x_obj # Use this instead of x bcs we need direction and cost values later on.
                     open.push(child) # Push the entire child obj into the open queue to be checked later.
 
-    return fwd_path
-
-
-
-
-def findAnswer(start, end, list):   # find answer from back to front
-    #print("end", end)
-    #print("list", list)
-    from game import Directions
-    from game import Actions
-    
-    answer = []
-    cur = end
-    while cur[0] != start:
-        x, y = cur[0]
-        dir = Directions.REVERSE[cur[1]]    # find reverse direction -> (nextx, nexty)
-        answer.append(cur[1])
-        #print(cur, cur[1])
-        dx, dy = Actions.directionToVector(dir)
-        nextx, nexty = int(x + dx), int(y + dy)     
-        
-        for li in list: 
-            if li[0] == (nextx, nexty):     # find next cur in list
-                cur = li
-    
-    answer.reverse()    # reverse answer because it is backward
-    #print("answer found by bfs!!", answer)
-    return answer
+    util.raiseNotDefined()
 
 
 def breadthFirstSearch(problem):
@@ -148,35 +122,39 @@ def breadthFirstSearch(problem):
     from util import Queue
     open = Queue()
     closed = []         # checked path
-    answerList = []     # possible path with ((x,y), dir, cost)  
     start = problem.getStartState()
+    parents = {start: None} # dictionary that records parent-child relationship between nodes
+    fwd_path = []       # the final answer to be returned; a forward path from the start state to the goal state
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    
     open.push([start])
     while not open.isEmpty():
         cur = open.pop()    # contains (x,y), dir, cost
-        curState = cur[0]   # only (x,y)
-        '''print("cur", cur)
-        print("curState", curState)
-        print("goal?",problem.isGoalState(curState))'''
+        curCoord = cur[0]   # only (x,y)
 
-        if problem.isGoalState(curState):
+        if problem.isGoalState(curCoord):
             #print("end")
-            return findAnswer(start, cur, answerList) # cur is end state
+            path = util.Stack() # Data structure used to hold backwards path from goal state to start state
 
-        successors = problem.getSuccessors(curState)
-        #print("suc", successors)
-        closed.append(curState)
-        answerList.append(cur)
+            while cur is not None: # Go until we find a node who has no parent, namely the starting node
+                path.push(cur) # Add node cur to the path
+                cur = parents[cur[0]] # Change focus to cur's parent (0th element is coords)
+
+            path.pop() # pop the start node off the stack, since we don't include it in the path.
+
+            while not path.isEmpty(): # Pop nodes off the stack until empty to reverse it
+                x = path.pop()
+                fwd_path.append(x[1]) # Only include the direction
+
+            return fwd_path # cur is end state
+
+        successors = problem.getSuccessors(curCoord)
+        closed.append(curCoord)
 
         for suc in successors:
-            if suc[0] not in closed:
+            if suc[0] not in closed and suc[0] not in list(map(lambda x : x[0], open.list)):
+                parents[suc[0]] = cur
                 open.push(suc)
         
-
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
