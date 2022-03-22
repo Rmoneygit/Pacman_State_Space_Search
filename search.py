@@ -132,7 +132,6 @@ def breadthFirstSearch(problem):
         curCoord = cur[0]   # only (x,y)
 
         if problem.isGoalState(curCoord):
-            #print("end")
             path = util.Stack() # Data structure used to hold backwards path from goal state to start state
 
             while cur is not None: # Go until we find a node who has no parent, namely the starting node
@@ -151,7 +150,8 @@ def breadthFirstSearch(problem):
         closed.append(curCoord)
 
         for suc in successors:
-            if suc[0] not in closed and suc[0] not in list(map(lambda x : x[0], open.list)):
+            openCoords = list(map(lambda x : x[0], open.list))
+            if suc[0] not in closed and suc[0] not in openCoords:
                 parents[suc[0]] = cur
                 open.push(suc)
         
@@ -160,6 +160,69 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    s = problem.getStartState() # Get the starting state of the problem
+    open = util.PriorityQueue() # LIFO queue containing nodes to be checked
+    closed = util.Queue() # LIFO queue containing nodes that have been checked
+    parents = {s: None} # dictionary that records parent-child relationship between nodes
+    fwd_path = [] # the final answer to be returned; a forward path from the start state to the goal state
+    
+    if not problem.isGoalState(s):
+        open.push((s, None), 0) # We need the brackets since problem.getStartState returns only a tuple.
+
+    while not open.isEmpty(): # Continue until we reach a point where there are no more nodes to check.
+        x_full = open.heap[0] # contains (priority, self.count, ((x, y), dir, cost))
+        x_obj = open.pop() # contains ((x, y), dir, cost)
+        x = x_obj[0] # only (x, y)
+
+        if(problem.isGoalState(x)):
+            path = util.Stack() # Data structure used to hold backwards path from goal state to start state
+
+            while parents[x_full[2][0]] is not None: # Go until we find a node who has no parent, namely the starting node
+                path.push(x_full) # Add node x_obj to the path
+                x_full = parents[x_full[2][0]] # Change focus to x_obj's parent (0th element is coords)
+
+            while not path.isEmpty(): # Pop nodes off the stack until empty to reverse it
+                x = path.pop()
+                fwd_path.append(x[2][1]) # Only include the direction
+
+            return fwd_path
+
+        else:
+            children = problem.getSuccessors(x) # Find the child nodes of x
+            
+            for child in children:  # child contains ((x, y), dir, cost)
+                coords = child[0]   
+                openCoords = list(map(lambda x : x[2][0], open.heap))   # entry = (priority, self.count, item)
+                closedCoords = list(map(lambda x : x[1][0], closed.list))   # entry = (priority, self.count, item)
+                
+                if coords not in closedCoords + openCoords:
+                    parents[coords] = x_full # Use this instead of x bcs we need priority, direction and cost values later on.
+                    cost = x_full[0]  + child[2]   # cost g(x)
+                    priority = cost   # priority f(x) = g(x)
+                    open.push(child, priority) # Push the entire child obj into the open queue to be checked later.
+
+                elif coords in openCoords:
+                    for entry in open.heap:  # entry = (priority, self.count, item)
+                        item = entry[2]
+                        if coords == item[0]:
+                            priority = x_full[0] + child[2] # calcultate new parent's priority
+                            if priority < entry[0]:     # if new path is shorter
+                                parents[coords] = x_full # update parent
+                                open.heap.remove(entry)
+                                open.push(child, priority)   # update priority in open
+
+                elif coords in closedCoords:
+                    for entry in closed.list:  # entry = (priority, self.count, item)
+                        item = entry[1]
+                        if coords == item[0]:
+                            priority = x_full[0] + child[2] # calcultate new parent's priority
+                            if priority < entry[0]:     # if new path is shorter
+                                parents[coords] = x_full # update parent
+                                closed.list.remove(entry)     
+                                open.push(child, priority)   # remove from closed and push to open
+                
+            closed.push((x_full[0], x_obj)) # We have visited x and seen is it not the goal state, so put it away into closed
+            
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -172,6 +235,69 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    s = problem.getStartState() # Get the starting state of the problem
+    open = util.PriorityQueue() # LIFO queue containing nodes to be checked
+    closed = util.Queue() # LIFO queue containing nodes that have been checked
+    parents = {s: None} # dictionary that records parent-child relationship between nodes
+    fwd_path = [] # the final answer to be returned; a forward path from the start state to the goal state
+    
+    if not problem.isGoalState(s):
+        open.push((s, None), heuristic(s, problem)) # We need the brackets since problem.getStartState returns only a tuple.
+
+    while not open.isEmpty(): # Continue until we reach a point where there are no more nodes to check.
+        x_full = open.heap[0] # contains (priority, self.count, ((x, y), dir, cost))
+        x_obj = open.pop() # contains ((x, y), dir, cost)
+        x = x_obj[0] # only (x, y)
+
+        if(problem.isGoalState(x)):
+            path = util.Stack() # Data structure used to hold backwards path from goal state to start state
+
+            while parents[x_full[2][0]] is not None: # Go until we find a node who has no parent, namely the starting node
+                path.push(x_full) # Add node x_obj to the path
+                x_full = parents[x_full[2][0]] # Change focus to x_obj's parent (0th element is coords)
+
+            while not path.isEmpty(): # Pop nodes off the stack until empty to reverse it
+                x = path.pop()
+                fwd_path.append(x[2][1]) # Only include the direction
+
+            return fwd_path
+
+        else:
+            children = problem.getSuccessors(x) # Find the child nodes of x
+            
+            for child in children:  # child contains ((x, y), dir, cost)
+                coords = child[0]   
+                openCoords = list(map(lambda x : x[2][0], open.heap))   # entry = (priority, self.count, item)
+                closedCoords = list(map(lambda x : x[1][0], closed.list))   # entry = (priority, self.count, item)
+                
+                if coords not in closedCoords + openCoords:
+                    parents[coords] = x_full # Use this instead of x bcs we need priority, direction and cost values later on.
+                    cost = x_full[0] - heuristic(x, problem)  + child[2]   # cost g(x)
+                    priority = cost + heuristic(coords, problem)   # priority f(x) = g(x) + h(x)
+                    open.push(child, priority) # Push the entire child obj into the open queue to be checked later.
+
+                elif coords in openCoords:
+                    for entry in open.heap:  # entry = (priority, self.count, item)
+                        item = entry[2]
+                        if coords == item[0]:
+                            priority = x_full[0] - heuristic(x, problem) + child[2] + heuristic(coords, problem) # calcultate new parent's priority
+                            if priority < entry[0]:     # if new path is shorter
+                                parents[coords] = x_full # update parent
+                                open.heap.remove(entry)
+                                open.push(child, priority)   # update priority in open
+
+                elif coords in closedCoords:
+                    for entry in closed.list:  # entry = (priority, self.count, item)
+                        item = entry[1]
+                        if coords == item[0]:
+                            priority = x_full[0] - heuristic(x, problem) + child[2] + heuristic(coords, problem) # calcultate new parent's priority
+                            if priority < entry[0]:     # if new path is shorter
+                                parents[coords] = x_full # update parent
+                                closed.list.remove(entry)     
+                                open.push(child, priority)   # remove from closed and push to open
+                
+            closed.push((x_full[0], x_obj)) # We have visited x and seen is it not the goal state, so put it away into closed
+            
     util.raiseNotDefined()
 
 
