@@ -34,6 +34,7 @@ description for details.
 Good luck and happy searching!
 """
 
+from pickle import FALSE
 from game import Directions
 from game import Agent
 from game import Actions
