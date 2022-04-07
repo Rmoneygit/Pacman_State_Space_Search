@@ -145,7 +145,7 @@ def breadthFirstSearch(problem):
                 fwd_path.append(x[1]) # Only include the direction
 
             return fwd_path # cur is end state
-
+        print(curCoord)
         successors = problem.getSuccessors(curCoord)
         closed.append(curCoord)
 
